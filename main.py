@@ -6,6 +6,7 @@ import numpy as np
 
 from LagrangeInterpolator import LagrangeInterpolator
 from NewtonInterpolator import NewtonInterpolator
+from NewtonInterpolator import WrongData
 
 
 def read_data():
@@ -46,6 +47,9 @@ def lab5():
     print(DataFrame({'x': xarr, 'y': yarr}))
 
     x = float(input("Enter x:\n>>> "))
+    if x < xarr[0] or x > xarr[len(xarr) - 1]:
+        print("Sowwy but this progwam cannot extwapolate (>.>;;) OwO")
+        return
 
     # Lagrange
     interpolated_y = LagrangeInterpolator.interpolate(xarr, yarr, x)
@@ -61,17 +65,20 @@ def lab5():
     plt.show()
 
     # Newton
-    interpolated_y = NewtonInterpolator.interpolate(xarr, yarr, x)
-    print("Newtone-interpolated y for x = " + str(x) + ":", interpolated_y)
+    try:
+        interpolated_y = NewtonInterpolator.interpolate(xarr, yarr, x)
+        print("Newtone-interpolated y for x = " + str(x) + ":", interpolated_y)
 
-    large_xarr = np.linspace(xarr[0], xarr[len(xarr) - 1], len(xarr) * 10)
-    interpolated_yarr = NewtonInterpolator.calculate_interpolations(xarr, yarr, large_xarr)
+        large_xarr = np.linspace(xarr[0], xarr[len(xarr) - 1], len(xarr) * 10)
+        interpolated_yarr = NewtonInterpolator.calculate_interpolations(xarr, yarr, large_xarr)
 
-    plt.title("Newtone polynom interpolation")
-    plt.plot(xarr, yarr, 'bo')
-    plt.plot(large_xarr, interpolated_yarr, 'r')
-    plt.plot([x], [interpolated_y], 'go')
-    plt.show()
+        plt.title("Newtone polynom interpolation")
+        plt.plot(xarr, yarr, 'bo')
+        plt.plot(large_xarr, interpolated_yarr, 'r')
+        plt.plot([x], [interpolated_y], 'go')
+        plt.show()
+    except WrongData as wrong_data_error:
+        print(wrong_data_error.args[0])
 
 
 if __name__ == '__main__':
