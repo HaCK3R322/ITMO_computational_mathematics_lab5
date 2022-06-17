@@ -19,6 +19,25 @@ class NewtonInterpolator:
                    - NewtonInterpolator.delta(values, value_pos, power - 1)
 
     @staticmethod
+    def calculate_d(values, power):
+        if power > len(values) + 1:
+            return {'possible': False}
+
+        size = len(values)
+        differences = [['x'] * size for arr in range(size)]
+
+        power = 0
+
+        for i in range(size):
+            differences[i][0] = values[i]
+
+        for j in range(1, size):
+            for i in range(size - j):
+                differences[i][j] = differences[i + 1][j - 1] - differences[i][j - 1]
+
+        return {'possible': True, 'differences': differences}
+
+    @staticmethod
     def get_t(t0, power, direct=True):
         answer = 1
         if power == 0:
@@ -41,16 +60,25 @@ class NewtonInterpolator:
                 index_of_x_before = i
             else:
                 break
+
         n = len(x_values)
         h = x_values[1] - x_values[0]
         t = (x - x_values[index_of_x_before]) / h
+
+        d = NewtonInterpolator.calculate_d(y_values, n)
+        if not d['possible']:
+            raise WrongData
+        differences = d['differences']
+        print("Got differences:")
+        from pandas import DataFrame
+        print(DataFrame(differences))
+
         answer = y_values[index_of_x_before]
-        power = 1
-        for i in range(index_of_x_before, n - 1):  # if len(xarr) == 7, -> i ... 6
-            answer += NewtonInterpolator.get_t(t, power) \
-                      * NewtonInterpolator.delta(y_values, index_of_x_before, power) \
+        for power in range(1, n - index_of_x_before):  # if len(xarr) == 7, -> i ... 6
+            print('direct, power =', power, ";")
+            answer += NewtonInterpolator.get_t(t, power, direct=True) \
+                      * differences[index_of_x_before][power] \
                       / math.factorial(power)
-            power += 1
         return answer
 
     @staticmethod
@@ -61,7 +89,7 @@ class NewtonInterpolator:
 
         answer = NewtonInterpolator.delta(y_values, n - 1, 0)
         for i in range(1, n):
-            answer += NewtonInterpolator.get_t(t, i, False) \
+            answer += NewtonInterpolator.get_t(t, i, direct=False) \
                       * NewtonInterpolator.delta(y_values, n - i - 1, i) \
                       / math.factorial(i)
         return answer
