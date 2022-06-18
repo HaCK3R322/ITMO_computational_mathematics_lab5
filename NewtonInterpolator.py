@@ -21,12 +21,10 @@ class NewtonInterpolator:
     @staticmethod
     def calculate_d(values, power):
         if power > len(values) + 1:
-            return {'possible': False}
+            return {'possible': False, 'differences': []}
 
         size = len(values)
-        differences = [['x'] * size for arr in range(size)]
-
-        power = 0
+        differences = [[' '] * size for arr in range(size)]
 
         for i in range(size):
             differences[i][0] = values[i]
@@ -54,6 +52,32 @@ class NewtonInterpolator:
 
     @staticmethod
     def direct_interpolation(x_values, y_values, x):
+        n = len(x_values)
+        h = x_values[1] - x_values[0]
+        t = (x - x_values[0]) / h
+
+        d = NewtonInterpolator.calculate_d(y_values, n)
+        if not d['possible']:
+            raise WrongData
+        differences = d['differences']
+
+        # print("Got differences:")
+        # from pandas import DataFrame
+        # print(DataFrame(differences))
+
+        answer = y_values[0]
+        # print("N" + str(n) + " = " + str(answer), end='')
+        for power in range(1, n):  # if len(xarr) == 7, -> i ... 6
+            answer += NewtonInterpolator.get_t(t, power, direct=True) \
+                      * differences[0][power] \
+                      / math.factorial(power)
+            # print("  +  " + str(round(NewtonInterpolator.get_t(t, power, direct=True), 3)) + " * " + str(round(
+            # differences[index_of_x_before][power], 3)) + " / " + str(math.factorial(power)), end="")
+        # print()
+        return answer
+
+    @staticmethod
+    def direct_interpolation_accurate(x_values, y_values, x):
         index_of_x_before = 0
         for i in range(len(x_values)):
             if x >= x_values[i]:
@@ -74,11 +98,13 @@ class NewtonInterpolator:
         print(DataFrame(differences))
 
         answer = y_values[index_of_x_before]
+        print("N" + str(n - index_of_x_before) + " = " + str(answer), end='')
         for power in range(1, n - index_of_x_before):  # if len(xarr) == 7, -> i ... 6
-            print('direct, power =', power, ";")
             answer += NewtonInterpolator.get_t(t, power, direct=True) \
                       * differences[index_of_x_before][power] \
                       / math.factorial(power)
+            print("  +  " + str(round(NewtonInterpolator.get_t(t, power, direct=True), 3)) + " * " + str(round(differences[index_of_x_before][power], 3)) + " / " + str(math.factorial(power)), end="")
+        print()
         return answer
 
     @staticmethod

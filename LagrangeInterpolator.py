@@ -2,14 +2,14 @@ class LagrangeInterpolator:
     @staticmethod
     def interpolate(x_values, y_values, x):
         n = len(x_values)
-        isum = 0
+        answer = 0
         for i in range(n):
-            jmul = 1
+            mult = 1
             for j in range(n):
                 if i != j:
-                    jmul *= (x - x_values[j]) / (x_values[i] - x_values[j])
-            isum += y_values[i] * jmul
-        return isum
+                    mult *= (x - x_values[j]) / (x_values[i] - x_values[j])
+            answer += y_values[i] * mult
+        return answer
 
     @staticmethod
     def calculate_interpolations(x_values, y_values, x_values_to_interpolate):
